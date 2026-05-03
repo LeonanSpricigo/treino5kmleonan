@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Treino 5km">
+<title>Treino 5km Sub-20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c26;
+    --border: rgba(255,255,255,0.08);
+    --accent-run: #3b82f6;
+    --accent-run-dim: rgba(59,130,246,0.15);
+    --accent-gym: #f97316;
+    --accent-gym-dim: rgba(249,115,22,0.15);
+    --accent-rest: #8b5cf6;
+    --accent-rest-dim: rgba(139,92,246,0.12);
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.12);
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.12);
+    --amber: #f59e0b;
+    --amber-dim: rgba(245,158,11,0.12);
+    --text: #f0f0f5;
+    --text2: #8888a0;
+    --text3: #55556a;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--bg);
+    padding: 56px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .logo { font-size: 13px; font-weight: 500; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; }
+  .today-badge {
+    background: var(--accent-run-dim);
+    color: var(--accent-run);
+    font-size: 12px; font-weight: 500;
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid rgba(59,130,246,0.2);
+  }
+  .header-title { font-size: 28px; font-weight: 600; line-height: 1.15; }
+  .header-title span { color: var(--accent-run); }
+
+  /* SEMANA SELECTOR */
+  .week-bar {
+    display: flex; gap: 8px; padding: 16px 20px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .week-bar::-webkit-scrollbar { display: none; }
+  .week-pill {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .week-pill.active {
+    background: var(--accent-run);
+    color: #fff;
+    border-color: var(--accent-run);
+  }
+  .week-pill.done { border-color: var(--green); color: var(--green); }
+
+  /* TABS */
+  .tabs {
+    display: grid; grid-template-columns: 1fr 1fr;
+    margin: 0 20px 16px;
+    background: var(--surface); border-radius: var(--radius-sm);
+    padding: 4px; gap: 4px;
+  }
+  .tab {
+    padding: 10px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    text-align: center; cursor: pointer;
+    color: var(--text2); transition: all 0.2s;
+  }
+  .tab.active { background: var(--surface2); color: var(--text); }
+
+  /* CONTENT */
+  .content { padding: 0 20px; }
+
+  /* PHASE BANNER */
+  .phase-banner {
+    padding: 12px 16px; border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+    border: 1px solid;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+  }
+  .phase-1 { background: var(--green-dim); border-color: rgba(34,197,94,0.25); color: var(--green); }
+  .phase-2 { background: var(--accent-run-dim); border-color: rgba(59,130,246,0.25); color: var(--accent-run); }
+  .phase-3 { background: var(--amber-dim); border-color: rgba(245,158,11,0.25); color: var(--amber); }
+  .phase-4 { background: var(--red-dim); border-color: rgba(239,68,68,0.25); color: var(--red); }
+
+  /* DAY CARD */
+  .day-card {
+    background: var(--surface); border-radius: var(--radius);
+    margin-bottom: 10px; overflow: hidden;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .day-card.completed { border-color: rgba(34,197,94,0.3); }
+  .day-card.skipped { opacity: 0.5; }
+
+  .day-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; cursor: pointer;
+  }
+  .day-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+    font-weight: 600;
+  }
+  .dot-run { background: var(--accent-run-dim); color: var(--accent-run); }
+  .dot-gym { background: var(--accent-gym-dim); color: var(--accent-gym); }
+  .dot-rest { background: var(--accent-rest-dim); color: var(--accent-rest); }
+  .dot-done { background: var(--green-dim); color: var(--green); }
+  .dot-skip { background: var(--red-dim); color: var(--red); }
+  .dot-light { background: var(--amber-dim); color: var(--amber); }
+
+  .day-info { flex: 1; min-width: 0; }
+  .day-name { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; }
+  .day-title { font-size: 15px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .day-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  .day-status { display: flex; gap: 6px; }
+  .status-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent; cursor: pointer;
+    font-size: 15px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .status-btn:active { transform: scale(0.9); }
+  .status-btn.ok { background: var(--green-dim); border-color: var(--green); }
+  .status-btn.ko { background: var(--red-dim); border-color: var(--red); }
+
+  /* DAY DETAIL */
+  .day-detail { padding: 0 16px 14px; display: none; }
+  .day-detail.open { display: block; }
+  .detail-divider { height: 1px; background: var(--border); margin-bottom: 12px; }
+
+  .pace-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 20px;
+    font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .pace-z1 { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+  .pace-z2 { background: var(--accent-run-dim); color: var(--accent-run); border: 1px solid rgba(59,130,246,0.2); }
+  .pace-z3 { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+  .pace-z4 { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+  .pace-na { background: var(--accent-rest-dim); color: var(--accent-rest); border: 1px solid rgba(139,92,246,0.2); }
+
+  .detail-desc {
+    font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 12px;
+  }
+
+  /* EXERCISE LIST */
+  .ex-list { display: flex; flex-direction: column; gap: 6px; }
+  .ex-item {
+    background: var(--surface2); border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .ex-name { font-size: 13px; color: var(--text); }
+  .ex-detail { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .ex-sets {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    color: var(--accent-gym); font-weight: 500; flex-shrink: 0; margin-left: 10px;
+    text-align: right;
+  }
+
+  /* TIP BOX */
+  .tip-box {
+    margin-top: 12px; padding: 10px 12px;
+    background: rgba(139,92,246,0.08);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-rest);
+    font-size: 12px; color: var(--text2); line-height: 1.5;
+  }
+
+  /* PACE REFERENCE */
+  .pace-ref {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .pace-ref-title { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+  .pace-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .pace-row:last-child { border-bottom: none; }
+  .pace-zone-name { font-size: 13px; color: var(--text2); }
+  .pace-zone-val { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }
+
+  /* PROGRESS */
+  .progress-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .progress-title { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; font-weight: 500; }
+  .progress-bar-wrap { background: var(--surface2); border-radius: 6px; height: 6px; margin-bottom: 8px; overflow: hidden; }
+  .progress-bar-fill { height: 6px; border-radius: 6px; background: var(--accent-run); transition: width 0.5s ease; }
+  .progress-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .stat-box { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px; }
+  .stat-num { font-size: 22px; font-weight: 600; }
+  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .stat-run .stat-num { color: var(--accent-run); }
+  .stat-gym .stat-num { color: var(--accent-gym); }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex; padding: 10px 0 28px;
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 4px; cursor: pointer;
+    padding: 4px 0; transition: all 0.2s;
+  }
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 10px; font-weight: 500; color: var(--text3); }
+  .nav-item.active .nav-label { color: var(--accent-run); }
+  .nav-item.active .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent-run); margin-top: 2px; }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">🏃 5km Sub-20</div>
+    <div class="today-badge" id="today-label">Carregando...</div>
+  </div>
+  <div class="header-title">Plano de <span>12 semanas</span></div>
+</div>
+
+<!-- SCREEN: TREINO DO DIA -->
+<div class="screen active" id="screen-home">
+  <div class="week-bar" id="week-bar"></div>
+
+  <div class="content">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('corrida')">🏃 Corrida</div>
+      <div class="tab" onclick="switchTab('musculacao')">🏋️ Musculação</div>
+    </div>
+
+    <div id="tab-corrida">
+      <div class="phase-banner" id="phase-banner-run"></div>
+      <div id="days-run"></div>
+    </div>
+
+    <div id="tab-musculacao" style="display:none">
+      <div class="phase-banner" id="phase-banner-gym"></div>
+      <div id="days-gym"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: REFERÊNCIA -->
+<div class="screen" id="screen-ref">
+  <div style="padding: 20px 20px 0;">
+    <div style="font-size: 22px; font-weight: 600; margin-bottom: 4px;">Referência</div>
+    <div style="font-size: 14px; color: var(--text2); margin-bottom: 20px;">Paces e zonas de treino</div>
+
+    <div class="pace-ref">
+      <div class="pace-ref-title">Zonas de pace — corrida</div>
+      <div class="pace-row"><span class="pace-zone-name">Z1 — Fácil</span><span class="pace-zone-val" style="color:var(--green)">5'30–6'00</span></div>
+      <div class="pace-row"><span class="pace-zone-name">Z2 — Moderado</span><span class="pace-zone-val" style="color:var(--accent-run)">4'45–5'15</span></div>
+      <div class="pace-row"><span class="pace-zone-name">Z3 — Limiar</span><span class="pace-zone-val" style="color:var(--amber)">4'10–4'30</span></div>
+      <div class="pace-row"><span class="pace-zone-name">Z4 — Tiro/VO₂max</span><span class="pace-zone-val" style="color:var(--red)">3'45–4'05</span></div>
+    </div>
+
+    <div class="pace-ref">
+      <div class="pace-ref-title">Fases do treino</div>
+      <div class="pace-row"><span class="pace-zone-name">Fase 1 — Adaptação</span><span class="pace-zone-val" style="color:var(--green)">Sem 1–4</span></div>
+      <div class="pace-row"><span class="pace-zone-name">Fase 2 — Velocidade</span><span class="pace-zone-val" style="color:var(--accent-run)">Sem 5–8</span></div>
+      <div class="pace-row"><span class="pace-zone-name">Fase 3 — Específico</span><span class="pace-zone-val" style="color:var(--amber)">Sem 9–12</span></div>
+    </div>
+
+    <div class="pace-ref">
+      <div class="pace-ref-title">Musculação — séries por fase</div>
+      <div class="pace-row"><span class="pace-zone-name">Sem 1–4 (Adaptação)</span><span class="pace-zone-val" style="color:var(--green)">3 × 12–15</span></div>
+      <div class="pace-row"><span class="pace-zone-name">Sem 5–8 (Hipertrofia)</span><span class="pace-zone-val" style="color:var(--accent-run)">4 × 8–12</span></div>
+      <div class="pace-row"><span class="pace-zone-name">Sem 9–12 (Força)</span><span class="pace-zone-val" style="color:var(--amber)">4 × 6–10</span></div>
+    </div>
+
+    <div class="pace-ref">
+      <div class="pace-ref-title">Dica de hidratação — MS</div>
+      <div style="font-size: 13px; color: var(--text2); line-height: 1.7; padding: 4px 0;">
+        Treinos após 18h com calor: beba 500ml de água <b style="color:var(--text)">1h antes</b> e leve água para treinos acima de 40 min. Pós-treino: 500–750ml nas 2h seguintes.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: PROGRESSO -->
+<div class="screen" id="screen-prog">
+  <div style="padding: 20px 20px 0;">
+    <div style="font-size: 22px; font-weight: 600; margin-bottom: 4px;">Progresso</div>
+    <div style="font-size: 14px; color: var(--text2); margin-bottom: 20px;">Acompanhe sua evolução</div>
+
+    <div class="progress-card">
+      <div class="progress-title">Conclusão geral do plano</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-bar" style="width:0%"></div></div>
+      <div style="font-size: 12px; color: var(--text2);" id="prog-label">0 de 84 treinos concluídos</div>
+      <div class="progress-stats">
+        <div class="stat-box stat-run"><div class="stat-num" id="stat-done">0</div><div class="stat-label">Realizados ✅</div></div>
+        <div class="stat-box stat-gym"><div class="stat-num" id="stat-skip" style="color:var(--red)">0</div><div class="stat-label">Pulados ❌</div></div>
+      </div>
+    </div>
+
+    <div class="progress-card">
+      <div class="progress-title">Progresso por semana</div>
+      <div id="week-prog-list"></div>
+    </div>
+
+    <div class="progress-card" style="border-color: rgba(59,130,246,0.3);">
+      <div class="progress-title">Meta</div>
+      <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:6px;">
+        <span style="font-size:32px; font-weight:600; color:var(--accent-run)">Sub 20</span>
+        <span style="font-size:14px; color:var(--text2)">minutos no 5km</span>
+      </div>
+      <div style="font-size:13px; color:var(--text2)">Pace alvo: <span style="font-family:'DM Mono',monospace; color:var(--accent-run)">4'00/km</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="showScreen('home')">
+    <div class="nav-icon">📅</div>
+    <div class="nav-label">Treinos</div>
+    <div class="nav-dot"></div>
+  </div>
+  <div class="nav-item" onclick="showScreen('ref')">
+    <div class="nav-icon">📊</div>
+    <div class="nav-label">Referência</div>
+  </div>
+  <div class="nav-item" onclick="showScreen('prog')">
+    <div class="nav-icon">📈</div>
+    <div class="nav-label">Progresso</div>
+  </div>
+</div>
+
+<script>
+const DIAS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DIAS_FULL = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+
+// ── DADOS CORRIDA ────────────────────────────────────────────────────────────
+const RUN_WEEKS = [
+  { fase:'Fase 1 — Base aeróbica', faseClass:'phase-1',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'25–30 min contínuos',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação',desc:'Core e quadríceps — sem corrida',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'Tiros 400m',desc:'6×400m com 90s recuperação',pace:"3'50–4'05",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Corrida moderada',desc:'30 min no ritmo base',pace:"4'45–5'15",zona:'z2',icone:'R'},
+      {nome:'Sexta',tipo:'Musculação',desc:'Perna + core — sem corrida',pace:'—',zona:'na',icone:'G'},
+      {nome:'Sábado',tipo:'Longão fácil',desc:'40–45 min sem pressão de pace',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Repouso ativo ou total',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'Fase 1 — Base aeróbica', faseClass:'phase-1',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'30 min contínuos',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação',desc:'Core e glúteos',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'Tiros 400m',desc:'8×400m com 90s recuperação',pace:"3'50–4'05",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Corrida moderada',desc:'35 min no ritmo base',pace:"4'45–5'15",zona:'z2',icone:'R'},
+      {nome:'Sexta',tipo:'Musculação',desc:'Perna + core',pace:'—',zona:'na',icone:'G'},
+      {nome:'Sábado',tipo:'Longão fácil',desc:'45–50 min fácil',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Repouso',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'Fase 2 — Velocidade e limiar', faseClass:'phase-2',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'30 min',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação',desc:'Core + mobilidade',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'Tiros 800m',desc:'5×800m com 2min recuperação',pace:"3'55–4'10",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Limiar (LT)',desc:'3×1km no ritmo limiar',pace:"4'10–4'30",zona:'z3',icone:'R'},
+      {nome:'Sexta',tipo:'Musculação',desc:'Perna + core',pace:'—',zona:'na',icone:'G'},
+      {nome:'Sábado',tipo:'Longão fácil',desc:'50 min fácil',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Repouso',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'Fase 2 — Velocidade e limiar', faseClass:'phase-2',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'30 min',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação',desc:'Core e glúteos',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'Tiros 800m',desc:'6×800m com 2min recuperação',pace:"3'55–4'10",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Limiar (LT)',desc:'2×2km no ritmo limiar',pace:"4'10–4'30",zona:'z3',icone:'R'},
+      {nome:'Sexta',tipo:'Musculação',desc:'Perna + core',pace:'—',zona:'na',icone:'G'},
+      {nome:'Sábado',tipo:'Longão fácil',desc:'55 min fácil',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Repouso',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'Fase 2 — Velocidade e limiar', faseClass:'phase-2',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'35 min',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação',desc:'Core + mobilidade',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'Tiros 1km',desc:"5×1km com 2'30 recuperação",pace:"3'50–4'00",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Tempo run',desc:'20 min contínuo no limiar',pace:"4'15–4'25",zona:'z3',icone:'R'},
+      {nome:'Sexta',tipo:'Musculação',desc:'Perna + core',pace:'—',zona:'na',icone:'G'},
+      {nome:'Sábado',tipo:'Longão fácil',desc:'55–60 min fácil',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Repouso',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'Semana de recuperação', faseClass:'phase-1',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'25 min leve',pace:"5'45–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação leve',desc:'Volume reduzido',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'Tiros curtos',desc:'4×400m — volume baixo',pace:"4'00–4'10",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Corrida fácil',desc:'25 min regenerativo',pace:"5'45–6'00",zona:'z1',icone:'R'},
+      {nome:'Sexta',tipo:'Musculação leve',desc:'Core apenas',pace:'—',zona:'na',icone:'G'},
+      {nome:'Sábado',tipo:'Corrida fácil',desc:'35 min sem pressão',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Repouso total',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'Fase 3 — Específico 5km', faseClass:'phase-3',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'35 min',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação',desc:'Perna + core',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'Tiros 1km',desc:'6×1km com 2min recuperação',pace:"3'45–3'55",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Pace run',desc:"2km meta + 2km fácil",pace:"4'00–4'10",zona:'z3',icone:'R'},
+      {nome:'Sexta',tipo:'Musculação',desc:'Perna + core',pace:'—',zona:'na',icone:'G'},
+      {nome:'Sábado',tipo:'Longão fácil',desc:'60 min fácil',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Repouso',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'Fase 3 — Específico 5km', faseClass:'phase-3',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'35 min',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação',desc:'Core + mobilidade',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'Tiros 1km',desc:'7×1km com 2min recuperação',pace:"3'45–3'55",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Pace run',desc:"3km no ritmo meta",pace:"4'00",zona:'z3',icone:'R'},
+      {nome:'Sexta',tipo:'Musculação',desc:'Perna + core',pace:'—',zona:'na',icone:'G'},
+      {nome:'Sábado',tipo:'Longão fácil',desc:'60 min fácil',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Repouso',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'Fase 3 — Específico 5km', faseClass:'phase-3',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'40 min',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação',desc:'Perna + core',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'Tiros 1200m',desc:'5×1200m com 2min recuperação',pace:"3'45–3'55",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Pace run',desc:"4km contínuos no ritmo meta",pace:"4'00",zona:'z3',icone:'R'},
+      {nome:'Sexta',tipo:'Musculação',desc:'Perna + core',pace:'—',zona:'na',icone:'G'},
+      {nome:'Sábado',tipo:'Longão fácil',desc:'65 min fácil',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Repouso',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'Fase 3 — Teste de evolução 🎯', faseClass:'phase-3',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'30 min',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação leve',desc:'Core + mobilidade',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'TESTE 3km',desc:'Corra 3km no ritmo alvo',pace:"4'00",zona:'z3',icone:'R'},
+      {nome:'Quinta',tipo:'Corrida fácil',desc:'25 min recuperação',pace:"5'45–6'00",zona:'z1',icone:'R'},
+      {nome:'Sexta',tipo:'Musculação',desc:'Perna + core',pace:'—',zona:'na',icone:'G'},
+      {nome:'Sábado',tipo:'Corrida fácil',desc:'40 min fácil',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Repouso',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'Fase 4 — Polimento (taper)', faseClass:'phase-4',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'25 min',pace:"5'30–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Musculação leve',desc:'Sem perna pesada',pace:'—',zona:'na',icone:'G'},
+      {nome:'Quarta',tipo:'Tiros curtos',desc:'4×600m — manter ritmo',pace:"3'50–4'00",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Corrida fácil',desc:'20 min solto',pace:"5'45–6'00",zona:'z1',icone:'R'},
+      {nome:'Sexta',tipo:'Descanso',desc:'Repouso',pace:'—',zona:'na',icone:'Z'},
+      {nome:'Sábado',tipo:'Ativação',desc:'15 min + 4×100m progressivos',pace:'Leve',zona:'z1',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Preparação para a prova',pace:'—',zona:'na',icone:'Z'},
+    ]},
+  { fase:'🏆 Semana da PROVA', faseClass:'phase-4',
+    dias:[
+      {nome:'Segunda',tipo:'Corrida fácil',desc:'20 min muito leve',pace:"5'45–6'00",zona:'z1',icone:'R'},
+      {nome:'Terça',tipo:'Descanso ativo',desc:'Caminhada ou alongamento',pace:'—',zona:'na',icone:'Z'},
+      {nome:'Quarta',tipo:'Ativação',desc:'15 min + 3×200m no ritmo da prova',pace:"3'50–4'00",zona:'z4',icone:'R'},
+      {nome:'Quinta',tipo:'Descanso',desc:'Repouso',pace:'—',zona:'na',icone:'Z'},
+      {nome:'Sexta',tipo:'Descanso',desc:'Carboidrate e hidratação',pace:'—',zona:'na',icone:'Z'},
+      {nome:'Sábado',tipo:'🏁 PROVA — 5km',desc:"Saia em 4'10 nos 1os 2km, acelere!",pace:"< 4'00",zona:'z4',icone:'R'},
+      {nome:'Domingo',tipo:'Descanso',desc:'Recuperação pós-prova — comemore!',pace:'—',zona:'na',icone:'Z'},
+    ]},
+];
+
+// ── DADOS MUSCULAÇÃO ─────────────────────────────────────────────────────────
+const GYM_WEEKS = [
+  {fase:'Adaptação — Semanas 1–4',faseClass:'phase-1',
+   dias:[
+    {nome:'Segunda',tipo:'Peito + Tríceps',desc:'Supino, crucifixo, dips, tríceps corda',ex:[
+      {n:'Supino reto c/ barra',s:'3×12–15',obs:'Cotovelos a 45°'},
+      {n:'Supino inclinado halteres',s:'3×12–15',obs:'Parte superior'},
+      {n:'Crucifixo polia baixa',s:'3×12–15',obs:'Amplitude completa'},
+      {n:'Dips / banco',s:'3×12–15',obs:'Incline o tronco'},
+      {n:'Tríceps corda polia',s:'3×12–15',obs:'Cotovelo fixo'},
+      {n:'Tríceps francês',s:'3×12–15',obs:'Controle na descida'},
+    ],icone:'G',tip:'Foco total em técnica — 15 dias de treino, não force a carga.'},
+    {nome:'Terça',tipo:'Pernas (Anterior)',desc:'Agachamento, leg press, extensora, avanço',ex:[
+      {n:'Agachamento livre',s:'3×15',obs:'⚠️ Joelho alinhado ao pé'},
+      {n:'Leg press 45°',s:'3×15',obs:'Quadril largura pés'},
+      {n:'Cadeira extensora',s:'3×15',obs:'Contração no topo'},
+      {n:'Avanço halteres',s:'3×12/perna',obs:'Passada longa'},
+      {n:'Panturrilha em pé',s:'3×20',obs:'Pausa no alto'},
+      {n:'Abdução de quadril',s:'3×15',obs:'Prevenção lesão'},
+    ],icone:'G',tip:'⚠️ Dia de perna: evite corrida pesada hoje e amanhã.'},
+    {nome:'Quarta',tipo:'Core + Mobilidade (leve)',desc:'Dia de tiro na corrida — apenas core',ex:[
+      {n:'Prancha frontal',s:'3×30s',obs:'Quadril neutro'},
+      {n:'Prancha lateral',s:'3×20s/lado',obs:'Quadril elevado'},
+      {n:'Dead bug',s:'3×10/lado',obs:'Lombar no chão'},
+      {n:'Hiperextensão',s:'3×15',obs:'Glúteo contrai no topo'},
+    ],icone:'L',tip:'⚡ Corrida de tiro hoje — musculação LEVE. Prioridade é a corrida.'},
+    {nome:'Quinta',tipo:'Core + Mobilidade (leve)',desc:'Dia de limiar na corrida — apenas core',ex:[
+      {n:'Prancha frontal',s:'3×30s',obs:'Respiração controlada'},
+      {n:'Prancha lateral',s:'3×20s/lado',obs:'Quadril elevado'},
+      {n:'Dead bug',s:'3×10/lado',obs:'Lombar colada ao chão'},
+      {n:'Rotação de quadril',s:'2×10/lado',obs:'Mobilidade — sem peso'},
+    ],icone:'L',tip:'⚡ Corrida de limiar hoje — musculação LEVE. Respeite a corrida.'},
+    {nome:'Sexta',tipo:'Pernas (Posterior)',desc:'Stiff, flexão joelho, glúteo, afundo búlgaro',ex:[
+      {n:'Stiff halteres',s:'3×12–15',obs:'⚠️ Joelhos semiflexionados'},
+      {n:'Flexão joelho máquina',s:'3×15',obs:'Foco bíceps femoral'},
+      {n:'Glúteo kickback',s:'3×15/lado',obs:'Contração no topo'},
+      {n:'Afundo búlgaro',s:'3×12/lado',obs:'Demanda equilíbrio'},
+      {n:'Panturrilha sentado',s:'3×20',obs:'Sóleo — essencial corrida'},
+      {n:'Adução de quadril',s:'3×15',obs:'Prevenção lesão'},
+    ],icone:'G',tip:'⚠️ Segundo dia de perna — longão leve amanhã.'},
+    {nome:'Sábado',tipo:'Ombros + Core',desc:'Desenvolvimento, elevações, abdominal',ex:[
+      {n:'Desenvolvimento halteres',s:'3×12–15',obs:'Não trave cotovelo'},
+      {n:'Elevação lateral',s:'3×15',obs:'Cotovelo semiflexionado'},
+      {n:'Elevação frontal alt.',s:'3×12/lado',obs:'Controle na descida'},
+      {n:'Encolhimento ombros',s:'3×15',obs:'Pausa 1s no topo'},
+      {n:'Abdominal infra',s:'3×15',obs:'Lombar no chão'},
+      {n:'Abdominal bicicleta',s:'3×20',obs:'Cotovelo toca joelho oposto'},
+    ],icone:'G',tip:'Após longão fácil — superiores não impactam a corrida.'},
+    {nome:'Domingo',tipo:'Descanso',desc:'Repouso total',ex:[],icone:'Z',tip:'Recuperação muscular e neural — obrigatório.'},
+  ]},
+];
+
+// Repete a semana 1 de musculação para todas as 12 semanas ajustando fase/séries
+const GYM_FASE_LABEL = [
+  'Adaptação — Semanas 1–4','Adaptação — Semanas 1–4','Adaptação — Semanas 1–4','Adaptação — Semanas 1–4',
+  'Hipertrofia/Força — Semanas 5–8','Hipertrofia/Força — Semanas 5–8','Hipertrofia/Força — Semanas 5–8','Hipertrofia/Força — Semanas 5–8',
+  'Força + Potência — Semanas 9–12','Força + Potência — Semanas 9–12','Força + Potência — Semanas 9–12','Força + Potência — Semanas 9–12',
+];
+const GYM_FASE_CLASS = ['phase-1','phase-1','phase-1','phase-1','phase-2','phase-2','phase-2','phase-2','phase-3','phase-3','phase-3','phase-3'];
+const GYM_SERIES = [
+  '3×12–15','3×12–15','3×12–15','3×12–15',
+  '4×8–12','4×8–12','4×8–12','4×8–12',
+  '4–5×6–10','4–5×6–10','4–5×6–10','4–5×6–10',
+];
+
+// ── ESTADO ────────────────────────────────────────────────────────────────────
+let currentWeek = 0;
+let currentTab = 'corrida';
+let status = JSON.parse(localStorage.getItem('trainStatus') || '{}');
+
+function saveStatus() { localStorage.setItem('trainStatus', JSON.stringify(status)); }
+
+function getKey(week, tab, day) { return `${week}-${tab}-${day}`; }
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function dotClass(icone, key) {
+  const s = status[key];
+  if (s === 'done') return 'dot-done';
+  if (s === 'skip') return 'dot-skip';
+  if (icone === 'R') return 'dot-run';
+  if (icone === 'G') return 'dot-gym';
+  if (icone === 'L') return 'dot-light';
+  return 'dot-rest';
+}
+function dotLabel(icone, key) {
+  const s = status[key];
+  if (s === 'done') return '✓';
+  if (s === 'skip') return '✕';
+  if (icone === 'R') return '🏃';
+  if (icone === 'G') return '🏋';
+  if (icone === 'L') return '⚡';
+  return '😴';
+}
+function paceClass(zona) {
+  return {z1:'pace-z1',z2:'pace-z2',z3:'pace-z3',z4:'pace-z4',na:'pace-na'}[zona]||'pace-na';
+}
+
+function renderRun(week) {
+  const wd = RUN_WEEKS[week];
+  document.getElementById('phase-banner-run').className = 'phase-banner ' + wd.faseClass;
+  document.getElementById('phase-banner-run').textContent = wd.fase;
+  const el = document.getElementById('days-run');
+  el.innerHTML = wd.dias.map((d,i) => {
+    const key = getKey(week,'run',i);
+    const open = i === getTodayDayIndex() ? 'open' : '';
+    const doneClass = status[key]==='done' ? 'completed' : status[key]==='skip' ? 'skipped' : '';
+    return `<div class="day-card ${doneClass}" id="dc-run-${week}-${i}">
+      <div class="day-header" onclick="toggleDetail('run-${week}-${i}')">
+        <div class="day-dot ${dotClass(d.icone,key)}">${dotLabel(d.icone,key)}</div>
+        <div class="day-info">
+          <div class="day-name">${d.nome}</div>
+          <div class="day-title">${d.tipo}</div>
+          <div class="day-meta">${d.desc}</div>
+        </div>
+        <div class="day-status" onclick="event.stopPropagation()">
+          ${d.icone!=='Z'?`<button class="status-btn ${status[key]==='done'?'ok':''}" onclick="setStatus(${week},'run',${i},'done')">✅</button>
+          <button class="status-btn ${status[key]==='skip'?'ko':''}" onclick="setStatus(${week},'run',${i},'skip')">❌</button>`:''}
+        </div>
+      </div>
+      <div class="day-detail ${open}" id="detail-run-${week}-${i}">
+        <div class="detail-divider"></div>
+        ${d.pace!=='—'?`<span class="pace-badge ${paceClass(d.zona)}">⏱ ${d.pace} /km</span>`:''}
+        <div class="detail-desc">${d.desc}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderGym(week) {
+  const base = GYM_WEEKS[0];
+  const seriesLabel = GYM_SERIES[week];
+  document.getElementById('phase-banner-gym').className = 'phase-banner ' + GYM_FASE_CLASS[week];
+  document.getElementById('phase-banner-gym').textContent = GYM_FASE_LABEL[week] + ' — ' + seriesLabel;
+  const el = document.getElementById('days-gym');
+  el.innerHTML = base.dias.map((d,i) => {
+    const key = getKey(week,'gym',i);
+    const open = i === getTodayDayIndex() ? 'open' : '';
+    const doneClass = status[key]==='done' ? 'completed' : status[key]==='skip' ? 'skipped' : '';
+    const exHtml = d.ex.length ? `<div class="ex-list">${d.ex.map(e=>`
+      <div class="ex-item">
+        <div><div class="ex-name">${e.n}</div><div class="ex-detail">${e.obs}</div></div>
+        <div class="ex-sets">${e.s.replace(/\d+×\d+[\w–]+/g, m => seriesLabel.split('×')[0]+'×'+m.split('×')[1])}</div>
+      </div>`).join('')}</div>` : '';
+    return `<div class="day-card ${doneClass}" id="dc-gym-${week}-${i}">
+      <div class="day-header" onclick="toggleDetail('gym-${week}-${i}')">
+        <div class="day-dot ${dotClass(d.icone,key)}">${dotLabel(d.icone,key)}</div>
+        <div class="day-info">
+          <div class="day-name">${d.nome}</div>
+          <div class="day-title">${d.tipo}</div>
+          <div class="day-meta">${d.desc}</div>
+        </div>
+        <div class="day-status" onclick="event.stopPropagation()">
+          ${d.icone!=='Z'?`<button class="status-btn ${status[key]==='done'?'ok':''}" onclick="setStatus(${week},'gym',${i},'done')">✅</button>
+          <button class="status-btn ${status[key]==='skip'?'ko':''}" onclick="setStatus(${week},'gym',${i},'skip')">❌</button>`:''}
+        </div>
+      </div>
+      <div class="day-detail ${open}" id="detail-gym-${week}-${i}">
+        <div class="detail-divider"></div>
+        ${exHtml}
+        ${d.tip?`<div class="tip-box">💡 ${d.tip}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getTodayDayIndex() {
+  const dow = new Date().getDay();
+  const map = {1:0,2:1,3:2,4:3,5:4,6:5,0:6};
+  return map[dow];
+}
+
+function renderWeekBar() {
+  const bar = document.getElementById('week-bar');
+  bar.innerHTML = Array.from({length:12},(_,i)=>{
+    const done = countDone(i);
+    const cls = i===currentWeek ? 'active' : done>0 ? 'done' : '';
+    return `<div class="week-pill ${cls}" onclick="selectWeek(${i})">Sem ${i+1}</div>`;
+  }).join('');
+}
+
+function countDone(week) {
+  let n=0;
+  for(let d=0;d<7;d++){
+    if(status[getKey(week,'run',d)]==='done') n++;
+    if(status[getKey(week,'gym',d)]==='done') n++;
+  }
+  return n;
+}
+
+function selectWeek(w) {
+  currentWeek = w;
+  renderWeekBar();
+  renderRun(w);
+  renderGym(w);
+}
+
+function toggleDetail(id) {
+  const el = document.getElementById('detail-'+id);
+  if(el) el.classList.toggle('open');
+}
+
+function setStatus(week, tab, day, val) {
+  const key = getKey(week,tab,day);
+  status[key] = status[key]===val ? null : val;
+  saveStatus();
+  if(tab==='run') renderRun(week);
+  else renderGym(week);
+  renderWeekBar();
+  updateProgress();
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='corrida'?0:1)));
+  document.getElementById('tab-corrida').style.display = tab==='corrida'?'block':'none';
+  document.getElementById('tab-musculacao').style.display = tab==='musculacao'?'block':'none';
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((n,i)=>{
+    const names=['home','ref','prog'];
+    n.classList.toggle('active',names[i]===name);
+    const dot=n.querySelector('.nav-dot');
+    if(dot) dot.remove();
+    if(names[i]===name){const d=document.createElement('div');d.className='nav-dot';n.appendChild(d);}
+  });
+  if(name==='prog') updateProgress();
+}
+
+function updateProgress() {
+  let done=0, skip=0;
+  const total=84;
+  for(let w=0;w<12;w++){
+    for(let d=0;d<7;d++){
+      const kr=getKey(w,'run',d), kg=getKey(w,'gym',d);
+      if(status[kr]==='done') done++;
+      if(status[kr]==='skip') skip++;
+      if(status[kg]==='done') done++;
+      if(status[kg]==='skip') skip++;
+    }
+  }
+  const pct=Math.round(done/total*100);
+  document.getElementById('prog-bar').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=`${done} de ${total} treinos concluídos (${pct}%)`;
+  document.getElementById('stat-done').textContent=done;
+  document.getElementById('stat-skip').textContent=skip;
+
+  const list=document.getElementById('week-prog-list');
+  list.innerHTML=Array.from({length:12},(_,w)=>{
+    let wd=0,ws=0;
+    for(let d=0;d<7;d++){
+      const kr=getKey(w,'run',d),kg=getKey(w,'gym',d);
+      if(status[kr]==='done'||status[kg]==='done') wd++;
+      if(status[kr]==='skip'||status[kg]==='skip') ws++;
+    }
+    const pct2=Math.round(wd/14*100);
+    return `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+        <span style="color:var(--text2)">Semana ${w+1}</span>
+        <span style="color:var(--text)">${wd}/14 (${pct2}%)</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct2}%;background:${pct2>=80?'var(--green)':pct2>=50?'var(--accent-run)':'var(--amber)'}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init() {
+  const now = new Date();
+  const dias_pt = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  document.getElementById('today-label').textContent = dias_pt[now.getDay()];
+  renderWeekBar();
+  renderRun(0);
+  renderGym(0);
+  updateProgress();
+}
+
+init();
+</script>
+</body>
+</html>
